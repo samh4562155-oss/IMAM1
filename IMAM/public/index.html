@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#061713">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/icon-192.png"><meta name="mobile-web-app-capable" content="yes"><meta name="format-detection" content="telephone=no"><title>إمام | رفيق الصلاة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#061713;--panel:#102a21;--panel2:#16382b;--gold:#dfc17a;--text:#f7f5ed;--muted:#b8c9bf;--line:#2b4b3d;--green:#85d5a4;--flash-bg:#fffbe9;--flash-text:#0b1f17}
+*{box-sizing:border-box}html,body{height:100%}body{margin:0;background:radial-gradient(ellipse at top,#174331 0,#061713 68%);color:var(--text);font-family:'Cairo',sans-serif;min-height:100vh}
+button,select{font:inherit}button{cursor:pointer;border:0;border-radius:15px;padding:13px 20px;font-weight:800;background:var(--gold);color:#15241b}button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#234638;color:var(--text);border:1px solid var(--line)}
+.screen{min-height:100vh}.hidden{display:none!important}
+/* Home */
+.home{max-width:920px;margin:auto;padding:24px 18px 26px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px}.brand{display:flex;align-items:center;gap:12px}.logo{width:50px;height:50px;border:1px solid var(--gold);border-radius:16px;display:grid;place-items:center;color:var(--gold);font-size:26px}.brand h1{font-size:26px;margin:0}.brand p{margin:0;color:var(--muted);font-size:13px}.hero{background:linear-gradient(135deg,#173d2e,#10271e);border:1px solid var(--line);border-radius:25px;padding:25px;margin-bottom:18px}.hero h2{margin:0 0 7px;font-size:26px}.hero p{margin:0;color:var(--muted);line-height:1.9}.panel{background:rgba(16,42,33,.95);border:1px solid var(--line);border-radius:22px;padding:22px}.panel h3{margin:0 0 17px;font-size:19px}.field{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}.field label{font-size:14px;color:var(--muted)}select{background:#092119;color:var(--text);border:1px solid var(--line);border-radius:13px;padding:12px;width:100%}.actions{display:flex;flex-wrap:wrap;gap:10px}.note{background:#092119;border:1px solid var(--line);padding:13px;border-radius:14px;color:var(--muted);font-size:12px;line-height:1.9;margin-top:17px}.note strong{color:var(--gold)}.muted{color:var(--muted);font-size:13px;line-height:1.8}.footer{text-align:center;color:var(--muted);font-size:12px;line-height:2.1;padding:22px 8px 0}
+.settings{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}.toggle{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text);margin:10px 0;cursor:pointer}.toggle input{accent-color:var(--gold);width:20px;height:20px}.toggle small{display:block;color:var(--muted);font-size:12px}
+.high-contrast{--bg:#000;--panel:#000;--panel2:#111;--text:#fff;--muted:#fff;--line:#fff;--gold:#ffeb00;--flash-bg:#ffeb00;--flash-text:#000}
+.high-contrast body{background:#000}
+/* Prayer screen: model, position indicator, recognized phrase. Nothing else. */
+.prayer-screen{height:100dvh;min-height:520px;display:flex;flex-direction:column;align-items:center;padding:max(10px,env(safe-area-inset-top)) 12px max(14px,env(safe-area-inset-bottom));overflow:hidden;position:relative}
+.exit{position:absolute;top:max(10px,env(safe-area-inset-top));inset-inline-start:12px;z-index:5;font-size:13px;padding:7px 13px;border-radius:30px;opacity:.75}
+.live-dot{position:absolute;top:max(18px,calc(env(safe-area-inset-top) + 8px));inset-inline-end:16px;z-index:5;width:12px;height:12px;border-radius:50%;background:#7a8a83}.live-dot.on{background:var(--green);box-shadow:0 0 0 4px rgba(133,213,164,.2)}.live-dot.err{background:#e06a5a}
+.pose-indicator{margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:2px;z-index:2}
+.pose-name{font-size:clamp(20px,5vw,30px);font-weight:900;color:var(--gold);background:rgba(5,23,17,.7);border:1px solid rgba(223,193,122,.35);padding:4px 22px;border-radius:40px}
+.rakah{font-size:13px;color:var(--muted)}
+.model-wrap{width:min(100%,900px);flex:1;min-height:0;position:relative}
+.three-host{position:absolute;inset:0}.three-host canvas{width:100%;height:100%;display:block}
+.three-fallback{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#e4d6ad;padding:20px}
+.recognized{width:min(100%,900px);min-height:92px;display:flex;align-items:center;justify-content:center;text-align:center;border:1px solid var(--line);background:var(--panel);border-radius:22px;padding:12px;font-size:clamp(24px,6.5vw,44px);font-weight:900;line-height:1.35;color:var(--muted);transition:color .3s,border-color .3s,background-color .3s}
+.recognized.fresh{color:#ffe6a0;border-color:var(--gold);background:#2c2a1a}
+.recognized.done{flex-direction:column;font-size:clamp(22px,6vw,38px);color:var(--flash-text);background:var(--gold);border-color:var(--gold)}
+/* Flash: one bright illumination that fades out. pointer-events:none so it never blocks anything. */
+.flash{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:6vw;background:var(--flash-bg);color:var(--flash-text);opacity:0;visibility:hidden;pointer-events:none;text-align:center}
+.flash span{font-size:clamp(40px,11vw,120px);font-weight:900;line-height:1.3}
+.flash.go{visibility:visible;animation:flash 1.15s ease-out forwards}
+@keyframes flash{0%{opacity:0}12%{opacity:.97}45%{opacity:.92}100%{opacity:0;visibility:hidden}}
+@media (prefers-reduced-motion: reduce){
+  /* No flashing: the phrase is shown on a calm, steady panel that simply disappears. */
+  .flash{background:rgba(255,251,233,.88)}
+  .flash.go{animation:none;opacity:1;visibility:visible}
+  .recognized{transition:none}
+}
+.complete{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:10px;pointer-events:none}
+.complete-card{background:var(--gold);color:var(--flash-text);border-radius:26px;padding:16px 34px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.45)}
+.complete-card b{display:block;font-size:clamp(30px,8vw,54px);font-weight:900;line-height:1.2}
+.complete-card small{display:block;font-size:clamp(16px,4vw,22px);font-weight:700;direction:ltr}
+/* Android / touch: big tap targets, safe areas, no accidental zoom or text selection */
+html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+button,select,.toggle{min-height:48px;touch-action:manipulation}
+.prayer-screen{user-select:none;-webkit-user-select:none;overscroll-behavior:none}
+.home{padding-top:max(24px,env(safe-area-inset-top));padding-bottom:max(26px,env(safe-area-inset-bottom))}
+.server-status{font-size:12px;color:var(--muted);margin-top:8px}.server-status.err{color:#f0a090}
+@media(max-width:600px){.actions{flex-direction:column}.actions button{width:100%;font-size:17px;padding:15px}.exit{min-height:40px}.toggle{font-size:15px}
+.home{padding-top:max(15px,env(safe-area-inset-top))}}
+@media(max-width:600px) and (orientation:portrait){.model-wrap{min-height:52dvh}}
+@media(max-height:500px) and (orientation:landscape){.prayer-screen{min-height:0}.pose-name{font-size:18px;padding:2px 16px}.recognized{min-height:56px;font-size:24px}}
+@media(max-width:600px){.home{padding:15px 12px}.hero{padding:19px}.hero h2{font-size:22px}.panel{padding:17px}.prayer-screen{padding-left:8px;padding-right:8px}.recognized{min-height:80px;border-radius:18px}}
+</style>
+</head>
+<body>
+<section id="homeScreen" class="screen home">
+ <header class="top"><div class="brand"><div class="logo">۞</div><div><h1>إمام</h1><p>رفيقك لمتابعة الصلاة في الجماعة</p></div></div></header>
+ <section class="hero"><h2>صلاتك… بوضوح وطمأنينة</h2><p>شخصية ثلاثية الأبعاد تساعدك على متابعة حركات الإمام. صُمم التطبيق لمساعدة المسلمين الصم وضعاف السمع، مع ضرورة متابعة الإمام وعدم الاعتماد على التطبيق وحده.</p></section>
+ <section class="panel"><h3>إعداد الصلاة</h3>
+  <div class="field"><label for="prayer">اختر الصلاة</label><select id="prayer"><option value="fajr">الفجر — ركعتان</option><option value="dhuhr">الظهر — أربع ركعات</option><option value="asr">العصر — أربع ركعات</option><option value="maghrib">المغرب — ثلاث ركعات</option><option value="isha">العشاء — أربع ركعات</option></select></div>
+  <div class="field"><label for="microphones">الميكروفون</label><select id="microphones"><option value="">اضغط تحديث الأجهزة</option></select></div>
+  <div class="actions"><button class="secondary" id="refreshMics">تحديث أجهزة الصوت</button><button id="start">ابدأ الصلاة والاستماع</button></div>
+  <p class="muted" id="micInfo">عند البدء، اسمح للمتصفح باستخدام الميكروفون.</p>
+  <p class="server-status" id="serverStatus" role="status"></p>
+  <div class="settings">
+   <label class="toggle"><input type="checkbox" id="flashToggle" checked><span>وميض الشاشة عند التعرف على العبارة<small>Screen flash on recognized phrase — إضاءة قصيرة واحدة، بدون وميض متكرر</small></span></label>
+   <label class="toggle"><input type="checkbox" id="vibration" checked><span>اهتزاز عند تغير الحركة<small>إن كان الجهاز يدعم ذلك</small></span></label>
+   <label class="toggle"><input type="checkbox" id="contrast"><span>وضع التباين العالي</span></label>
+  </div>
+  <div class="note"><strong>الخصوصية:</strong> عند تشغيل الاستماع، يُرسل صوت الميكروفون إلى Deepgram عبر الإنترنت لتحويل الكلام إلى نص. لا تحفظ هذه النسخة التسجيلات.</div>
+ </section>
+ <footer class="footer">كلية التربية النوعية — قسم تكنولوجيا<br>Development and Programming: Abdullah Gouda Basyouni<br>UI/UX Design and Testing: Mohamed Sherif Saeed</footer>
+</section>
+
+<section id="prayerScreen" class="screen prayer-screen hidden">
+ <button class="secondary exit" id="back" aria-label="إنهاء والرجوع">إنهاء</button>
+ <span class="live-dot" id="liveDot" role="status" aria-label="حالة الاستماع"></span>
+ <div class="pose-indicator" aria-live="polite"><span class="pose-name" id="poseName">في انتظار تكبيرة الإحرام</span><span class="rakah" id="rakahInfo"></span></div>
+ <div class="model-wrap"><div id="threeHost" class="three-host"></div>
+ </div>
+ <div class="recognized" id="recognized" aria-live="assertive">—</div>
+</section>
+
+<div class="flash" id="flash" aria-hidden="true"><span id="flashText"></span></div>
+
+<!-- Relative paths so the same files work from Express and inside the Capacitor Android app -->
+<script src="config.js"></script>
+<script src="vendor/three.min.js"></script>
+<script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"><\/script>')</script>
+<script src="lib/prayer.js"></script>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);
+const P=window.ImamPrayer;
+// Backend address: '' = same server (web). In the Android app, config.js points to the hosted HTTPS server.
+const API_BASE=String((window.IMAM_CONFIG&&window.IMAM_CONFIG.apiBase)||'').replace(/\/+$/,'');
+const IS_NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+const NAMES={WAITING:'في انتظار تكبيرة الإحرام',QIYAM:'القيام',RUKU:'الركوع',ITIDAL:'الاعتدال',SUJUD_1:'السجود الأول',JALSA:'الجلوس بين السجدتين',SUJUD_2:'السجود الثاني',TASHAHHUD_MIDDLE:'التشهد الأوسط',TASHAHHUD_FINAL:'التشهد الأخير',TASLEEM_RIGHT:'التسليم يمينًا',TASLEEM_LEFT:'التسليم يسارًا'};
+const ORD=['','الأولى','الثانية','الثالثة','الرابعة'];
+let prayer=P.createPrayerState($('prayer').value),filter=P.createResultFilter(),stream=null,ws=null,audioCtx=null,active=false,processor=null,three=null,keepAlive=0,stopTimer=0,freshTimer=0;
+
+// ---------- settings ----------
+const SETTINGS_KEY='imam.settings';
+function loadSettings(){try{const s=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');if(typeof s.flash==='boolean')$('flashToggle').checked=s.flash;if(typeof s.vibration==='boolean')$('vibration').checked=s.vibration;if(typeof s.contrast==='boolean')$('contrast').checked=s.contrast}catch(_){}document.documentElement.classList.toggle('high-contrast',$('contrast').checked)}
+function saveSettings(){try{localStorage.setItem(SETTINGS_KEY,JSON.stringify({flash:$('flashToggle').checked,vibration:$('vibration').checked,contrast:$('contrast').checked}))}catch(_){}}
+
+// ---------- visual feedback ----------
+function flash(text){
+  if(!$('flashToggle').checked)return;            // disabled: phrase still shows below the model
+  const el=$('flash');$('flashText').textContent=text;
+  el.classList.remove('go');void el.offsetWidth;el.classList.add('go');   // one flash per phrase, restarts cleanly
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('go'),1100)}
+}
+function showPhrase(phraseKey){
+  const el=$('recognized');el.textContent=P.PHRASE_TEXT[phraseKey];el.classList.add('fresh');
+  clearTimeout(freshTimer);freshTimer=setTimeout(()=>el.classList.remove('fresh'),2200);
+}
+function render(){
+  $('poseName').textContent=NAMES[prayer.state];
+  const total=P.RAKAH_COUNTS[prayer.prayer];
+  $('rakahInfo').textContent=prayer.rakah?`الركعة ${ORD[prayer.rakah]||prayer.rakah} من ${total}`:'';
+  if(prayer.completed){const r=$('recognized');r.innerHTML='تمت الصلاة<br><span dir="ltr">Prayer Completed</span>';r.classList.remove('fresh');r.classList.add('done')}
+  if(three)three.pose(prayer.state);
+}
+function reset(){prayer=P.createPrayerState($('prayer').value);filter.reset();clearTimeout(stopTimer);const r=$('recognized');r.textContent='—';r.className='recognized';render()}
+
+// One entry point for a recognized phrase (from Deepgram, or from window.__imam.say for testing).
+function onPhrase(phraseKey){
+  const next=P.transitionPrayer(prayer,phraseKey);
+  if(!next.changed)return false;                  // out-of-order phrase: ignored, no movement, no flash
+  prayer=next;showPhrase(phraseKey);render();flash(P.PHRASE_TEXT[phraseKey]);
+  if($('vibration').checked&&navigator.vibrate)navigator.vibrate(90);
+  if(prayer.completed){$('liveDot').className='live-dot';stopTimer=setTimeout(stop,2500)}   // finish: stop listening, no new cycle
+  return true;
+}
+function handleResult(data){const phrase=filter.accept(data);if(phrase)onPhrase(phrase)}
+
+// ---------- audio + Deepgram (unchanged pipeline) ----------
+async function refreshMics(){try{const devices=await navigator.mediaDevices.enumerateDevices();const list=devices.filter(d=>d.kind==='audioinput');$('microphones').innerHTML='';list.forEach((d,i)=>{const o=document.createElement('option');o.value=d.deviceId;o.textContent=d.label||`ميكروفون ${i+1}`;$('microphones').append(o)});if(!list.length)$('microphones').add(new Option('لا توجد أجهزة ظاهرة',''))}catch(e){$('micInfo').textContent='تعذر عرض أجهزة الصوت: '+e.message}}
+// ---------- mobile helpers: keep screen on, Android back button ----------
+let wakeLock=null;
+async function keepAwake(){try{if('wakeLock' in navigator&&!wakeLock){wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>{wakeLock=null})}}catch(_){}}
+function releaseAwake(){try{wakeLock&&wakeLock.release()}catch(_){}wakeLock=null}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!$('prayerScreen').classList.contains('hidden'))keepAwake()});
+function onPrayerScreen(){return !$('prayerScreen').classList.contains('hidden')}
+// Back button / back gesture on the prayer screen returns home instead of closing the app.
+window.addEventListener('popstate',()=>{if(onPrayerScreen())backHome(true)});
+function showPrayerScreen(){const wasHidden=!onPrayerScreen();$('homeScreen').classList.add('hidden');$('prayerScreen').classList.remove('hidden');if(wasHidden)try{history.pushState({imam:'prayer'},'')}catch(_){}keepAwake();if(three)three.resize()}
+async function checkServer(){const el=$('serverStatus');try{const r=await fetch(API_BASE+'/api/health',{cache:'no-store'});if(!r.ok)throw 0;el.textContent='';el.className='server-status'}catch(_){el.textContent='تعذر الوصول إلى خادم إمام. تحقق من الاتصال بالإنترنت.';el.className='server-status err'}}
+async function start(){
+  if(!navigator.mediaDevices?.getUserMedia){alert(IS_NATIVE?'هذا الجهاز لا يدعم الميكروفون داخل التطبيق.':'افتح التطبيق عبر localhost أو HTTPS في متصفح يدعم الميكروفون.');return}
+  try{
+    $('start').disabled=true;$('micInfo').textContent='جارٍ طلب إذن الميكروفون…';
+    const deviceId=$('microphones').value;
+    stream=await navigator.mediaDevices.getUserMedia({audio:{deviceId:deviceId?{exact:deviceId}:undefined,channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+    await refreshMics();
+    const AC=window.AudioContext||window.webkitAudioContext;audioCtx=new AC();
+    const tokenRes=await fetch(API_BASE+'/api/deepgram-token',{method:'POST',headers:{'X-Imam-Client':IS_NATIVE?'android':'web'}});const tokenData=await tokenRes.json();
+    if(!tokenRes.ok)throw new Error(tokenData.error||'تعذر الحصول على رمز Deepgram');
+    if(!tokenData.access_token)throw new Error('الخادم لم يرجع رمز Deepgram صالحًا');
+    showPrayerScreen();
+    const url='wss://api.deepgram.com/v1/listen?model=nova-3&language=ar&encoding=linear16&sample_rate=16000&channels=1&interim_results=true&endpointing=400&vad_events=true';
+    ws=new WebSocket(url,['bearer',tokenData.access_token]);ws.binaryType='arraybuffer';
+    ws.onopen=()=>{active=true;$('liveDot').className='live-dot on';
+      processor=audioCtx.createScriptProcessor(4096,1,1);const input=audioCtx.createMediaStreamSource(stream);input.connect(processor);processor.connect(audioCtx.destination);
+      processor.onaudioprocess=e=>{if(!active||!ws||ws.readyState!==WebSocket.OPEN)return;const data=e.inputBuffer.getChannelData(0),ratio=audioCtx.sampleRate/16000,len=Math.floor(data.length/ratio),pcm=new Int16Array(len);for(let i=0;i<len;i++){const s=Math.max(-1,Math.min(1,data[Math.floor(i*ratio)]));pcm[i]=s<0?s*32768:s*32767}ws.send(pcm.buffer)};
+      keepAlive=setInterval(()=>{if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'KeepAlive'}))},8000)};
+    ws.onmessage=e=>{if(typeof e.data!=='string')return;let d;try{d=JSON.parse(e.data)}catch(_){return}handleResult(d)};
+    ws.onerror=()=>{$('liveDot').className='live-dot err'};
+    ws.onclose=()=>{if(active)stop()};
+  }catch(e){stop();$('micInfo').textContent=e.message;alert(e.message)}finally{$('start').disabled=false}
+}
+function stop(){active=false;clearInterval(keepAlive);if(ws){try{if(ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'CloseStream'}));ws.close()}catch(_){}ws=null}if(processor){processor.disconnect();processor=null}if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}if(audioCtx){audioCtx.close().catch(()=>{});audioCtx=null}if(!prayer.completed)$('liveDot').className='live-dot'}
+function backHome(fromHistory){stop();releaseAwake();if(!fromHistory&&history.state&&history.state.imam==='prayer')try{history.back()}catch(_){}$('prayerScreen').classList.add('hidden');$('homeScreen').classList.remove('hidden');$('micInfo').textContent='تم إيقاف الاستماع. يمكنك البدء مرة أخرى.'}
+$('refreshMics').addEventListener('click',async()=>{try{const temp=await navigator.mediaDevices.getUserMedia({audio:true});temp.getTracks().forEach(t=>t.stop());await refreshMics()}catch(e){$('micInfo').textContent='اسمح للمتصفح باستخدام الميكروفون أولًا.'}});
+$('start').addEventListener('click',()=>{reset();start()});$('back').addEventListener('click',()=>backHome(false));$('prayer').addEventListener('change',reset);
+$('contrast').addEventListener('change',e=>{document.documentElement.classList.toggle('high-contrast',e.target.checked);saveSettings()});
+$('flashToggle').addEventListener('change',saveSettings);$('flash').addEventListener('animationend',e=>e.currentTarget.classList.remove('go'));$('vibration').addEventListener('change',saveSettings);
+window.addEventListener('beforeunload',stop);
+
+// ---------- 3D prayer figure ----------
+// Procedural, jointed figure (pelvis → spine → chest → neck → head, shoulders → elbows → wrists, hips → knees → ankles).
+// Every pose is a set of joint rotations; transitions slerp each joint, so limbs always stay connected.
+function init3D(){
+  const host=$('threeHost');
+  if(!window.THREE){host.innerHTML='<div class="three-fallback">تعذر تحميل العرض ثلاثي الأبعاد. أعد فتح التطبيق.</div>';return}
+  const T=THREE,D=Math.PI/180;
+  const scene=new T.Scene();
+  const camera=new T.PerspectiveCamera(30,1,.1,100);
+  const renderer=new T.WebGLRenderer({antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputColorSpace=T.SRGBColorSpace;
+  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
+  host.appendChild(renderer.domElement);
+
+  scene.add(new T.HemisphereLight(0xf3f6ff,0x2a4434,1.4));
+  const key=new T.DirectionalLight(0xfff0d6,2.6);key.position.set(-3,6,4);key.castShadow=true;key.shadow.mapSize.set(1024,1024);
+  Object.assign(key.shadow.camera,{left:-2.5,right:2.5,top:2.5,bottom:-2.5,near:1,far:15});key.shadow.bias=-.0005;key.shadow.radius=4;scene.add(key);
+  const rim=new T.DirectionalLight(0xbfe6d0,1.3);rim.position.set(3,3,-4);scene.add(rim);
+
+  // Prayer rug (canvas texture), long side toward qibla (-X).
+  const c=document.createElement('canvas');c.width=512;c.height=256;const g=c.getContext('2d');
+  g.fillStyle='#7a1f24';g.fillRect(0,0,512,256);g.strokeStyle='#d9b569';g.lineWidth=10;g.strokeRect(14,14,484,228);
+  g.lineWidth=3;g.strokeRect(34,34,444,188);g.fillStyle='#5c1519';g.beginPath();g.moveTo(40,128);g.quadraticCurveTo(70,50,150,40);g.lineTo(150,216);g.quadraticCurveTo(70,206,40,128);g.fill();g.stroke();
+  for(let i=0;i<9;i++){g.fillStyle=i%2?'#d9b569':'#2f5a46';g.beginPath();g.arc(220+i*28,128,7,0,7);g.fill()}
+  const rugTex=new T.CanvasTexture(c);rugTex.colorSpace=T.SRGBColorSpace;rugTex.anisotropy=4;
+  const rug=new T.Mesh(new T.PlaneGeometry(2.3,1.05),new T.MeshStandardMaterial({map:rugTex,roughness:.95}));
+  rug.rotation.x=-Math.PI/2;rug.position.set(-.35,.002,0);rug.receiveShadow=true;scene.add(rug);
+  const floor=new T.Mesh(new T.CircleGeometry(3.2,64),new T.MeshStandardMaterial({color:0x163628,roughness:1,transparent:true,opacity:.65}));
+  floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+
+  const M=(color,rough=.8)=>new T.MeshStandardMaterial({color,roughness:rough});
+  const robe=M(0xf1efe7,.88),robeDeep=M(0xdcd9cd,.9),skin=M(0xc08a62,.6),cap=M(0xffffff,.85),hair=M(0x2b211b,.9),sole=M(0x3a2e26,.7);
+  const add=(parent,geo,mat,x=0,y=0,z=0)=>{const m=new T.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m};
+  const joint=(parent,x,y,z)=>{const o=new T.Group();o.position.set(x,y,z);parent.add(o);return o};
+  const capsule=(r,len)=>new T.CapsuleGeometry(r,len,6,16);
+
+  // Dimensions (metres, ~1.75 m tall)
+  const THIGH=.45,SHIN=.43,ANKLE=.08,UARM=.29,FARM=.26;
+  const person=new T.Group();person.rotation.y=-Math.PI/2;scene.add(person);   // faces qibla (-X)
+  const root=joint(person,0,THIGH+SHIN+ANKLE,0);                                // hip centre
+  // Upper body
+  const spine=joint(root,0,.02,0);
+  add(spine,capsule(.17,.16),robe,0,.12,0).scale.set(1.15,1,.85);                 // abdomen
+  const chest=joint(spine,0,.26,0);
+  add(chest,capsule(.19,.14),robe,0,.1,0).scale.set(1.12,1,.8);                   // chest
+  add(chest,new T.CylinderGeometry(.07,.09,.07,16),robeDeep,0,.27,.0);            // collar
+  const neck=joint(chest,0,.29,0);
+  add(neck,new T.CylinderGeometry(.05,.055,.1,12),skin,0,.04,0);
+  const head=joint(neck,0,.09,0);
+  const skull=add(head,new T.SphereGeometry(.108,32,24),skin,0,.1,.01);skull.scale.set(.92,1.12,1);
+  add(head,new T.SphereGeometry(.104,32,16,0,Math.PI*2,0,Math.PI*.42),cap,0,.13,-.005).scale.set(.97,1,1.03);   // kufi
+  add(head,new T.SphereGeometry(.03,12,8),skin,0,.09,.115).scale.set(.7,1,1);     // nose (shows facing direction)
+  const beard=add(head,new T.SphereGeometry(.085,20,14,0,Math.PI*2,Math.PI*.45,Math.PI*.55),hair,0,.075,.03);beard.scale.set(.95,1,1);
+  [-.037,.037].forEach(x=>add(head,new T.SphereGeometry(.012,8,6),hair,x,.125,.098));          // eyes
+  [-.1,.1].forEach(x=>add(head,new T.SphereGeometry(.022,10,8),skin,x,.1,0).scale.set(.5,1,.8)); // ears
+
+  function arm(side){ // side: +1 = left (local +X), -1 = right
+    const sh=joint(chest,side*.2,.2,0);
+    add(sh,new T.SphereGeometry(.075,16,12),robe,0,0,0);
+    add(sh,capsule(.062,UARM-.06),robe,0,-UARM/2,0);
+    const el=joint(sh,0,-UARM,0);
+    add(el,capsule(.052,FARM-.06),robe,0,-FARM/2+.01,0);                         // sleeve
+    const wr=joint(el,0,-FARM,0);
+    add(wr,new T.SphereGeometry(.04,12,10),skin,0,-.01,0);
+    add(wr,new T.BoxGeometry(.075,.11,.03),skin,0,-.07,0);                       // palm
+    return {sh,el,wr};
+  }
+  function leg(side){
+    const hp=joint(root,side*.1,0,0);
+    add(hp,capsule(.095,THIGH-.08),robe,0,-THIGH/2,0);
+    const kn=joint(hp,0,-THIGH,0);
+    add(kn,capsule(.075,SHIN-.08),robe,0,-SHIN/2,0);
+    const an=joint(kn,0,-SHIN,0);
+    add(an,new T.SphereGeometry(.045,10,8),skin,0,0,0);
+    add(an,new T.BoxGeometry(.09,.06,.24),sole,0,-.045,.06);                      // foot
+    return {hp,kn,an};
+  }
+  add(root,capsule(.2,.06),robe,0,.0,0).scale.set(1.1,1,.85);                    // pelvis / robe at hips
+  const L=arm(1),R=arm(-1),LL=leg(1),RL=leg(-1);
+  const J={root,spine,chest,neck,head,shL:L.sh,elL:L.el,wrL:L.wr,shR:R.sh,elR:R.el,wrR:R.wr,hpL:LL.hp,knL:LL.kn,anL:LL.an,hpR:RL.hp,knR:RL.kn,anR:RL.an};
+
+  // Pose = {y,z: root height/offset, joint:[x,y,z] degrees}. Forward bend = +x on spine; hip flexion = -x; knee bend = +x.
+  const handsFolded={shL:[-28,0,-12],elL:[-98,-42,0],shR:[-30,0,14],elR:[-96,40,0],wrL:[0,0,0],wrR:[0,0,0]};
+  const sitting={y:.21,z:-.12,spine:[4,0,0],chest:[2,0,0],neck:[4,0,0],head:[6,0,0],
+    hpL:[-88,-4,0],knL:[172,0,0],anL:[-6,0,0],hpR:[-88,4,0],knR:[172,0,0],anR:[60,0,0],
+    shL:[-30,0,-6],elL:[-28,0,0],wrL:[-30,0,0],shR:[-30,0,6],elR:[-28,0,0],wrR:[-30,0,0]};
+  const STAND={y:THIGH+SHIN+ANKLE,z:0,spine:[0,0,0],chest:[0,0,0],neck:[4,0,0],head:[8,0,0],hpL:[0,0,0],knL:[0,0,0],anL:[0,0,0],hpR:[0,0,0],knR:[0,0,0],anR:[0,0,0]};
+  const POSES={
+    QIYAM:{...STAND,...handsFolded,head:[18,0,0]},                                 // gaze to place of sujud
+    RUKU:{...STAND,y:THIGH+SHIN+ANKLE-.01,z:-.06,hpL:[6,0,0],hpR:[6,0,0],anL:[-6,0,0],anR:[-6,0,0],spine:[50,0,0],chest:[38,0,0],neck:[-4,0,0],head:[-6,0,0],
+          shL:[-36,0,-4],elL:[-6,0,0],wrL:[-10,0,0],shR:[-36,0,4],elR:[-6,0,0],wrR:[-10,0,0]},
+    ITIDAL:{...STAND,shL:[2,0,4],elL:[-6,0,0],shR:[2,0,-4],elR:[-6,0,0],wrL:[0,0,0],wrR:[0,0,0]},
+    SUJUD_1:{y:.52,z:-.18,hpL:[-30,-3,0],knL:[120,0,0],anL:[-70,0,0],hpR:[-30,3,0],knR:[120,0,0],anR:[-70,0,0],
+          spine:[78,0,0],chest:[50,0,0],neck:[-18,0,0],head:[-12,0,0],
+          shL:[-100,0,-14],elL:[70,0,0],wrL:[-60,0,0],shR:[-100,0,14],elR:[70,0,0],wrR:[-60,0,0]},
+    JALSA:sitting,
+    TASHAHHUD:{...sitting,elR:[-38,0,0],wrR:[-40,0,0]},
+    TASLEEM_RIGHT:{...sitting,neck:[4,-30,0],head:[4,-45,0]},
+    TASLEEM_LEFT:{...sitting,neck:[4,30,0],head:[4,45,0]}
+  };
+  POSES.SUJUD_2=POSES.SUJUD_1;POSES.TASHAHHUD_MIDDLE=POSES.TASHAHHUD;POSES.TASHAHHUD_FINAL=POSES.TASHAHHUD;POSES.WAITING={...STAND,shL:[2,0,4],shR:[2,0,-4],elL:[-6,0,0],elR:[-6,0,0]};
+  const JOINTS=Object.keys(J).filter(k=>k!=='root');
+  const toQ=a=>new T.Quaternion().setFromEuler(new T.Euler((a?.[0]||0)*D,(a?.[1]||0)*D,(a?.[2]||0)*D,'YXZ'));
+  function snapshot(){const s={y:root.position.y,z:root.position.z};JOINTS.forEach(k=>s[k]=J[k].quaternion.clone());return s}
+  function target(name){const p=POSES[name]||POSES.QIYAM,s={y:p.y,z:p.z||0};JOINTS.forEach(k=>s[k]=toQ(p[k]));return s}
+  function apply(a,b,t){root.position.y=a.y+(b.y-a.y)*t;root.position.z=a.z+(b.z-a.z)*t;JOINTS.forEach(k=>J[k].quaternion.slerpQuaternions(a[k],b[k],t))}
+
+  // Camera: three-quarter side view so bowing/prostration read clearly; moves to a front view for tasleem.
+  const CAMS={side:{p:new T.Vector3(-1.6,1.25,3.7),l:new T.Vector3(-.2,.88,0)},sit:{p:new T.Vector3(-2.1,1.05,2.8),l:new T.Vector3(-.3,.47,0)},front:{p:new T.Vector3(-2.5,1.0,.75),l:new T.Vector3(0,.58,0)}};
+  const camFor=n=>/TASLEEM/.test(n)?'front':/JALSA|TASHAHHUD|SUJUD/.test(n)?'sit':'side';
+  let anim=null,camFrom={p:CAMS.side.p.clone(),l:CAMS.side.l.clone()},camTo=CAMS.side,camLook=CAMS.side.l.clone(),camT=1,poseName='WAITING';
+  const reduce=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+  function pose(name,instant){
+    if(name===poseName&&!instant)return;poseName=name;
+    const dur=instant||reduce()?0:(/SUJUD/.test(name)||/SUJUD/.test(anim?.name||'')?1100:850);
+    anim={from:snapshot(),to:target(name),start:performance.now(),dur,name};
+    camFrom={p:camera.position.clone(),l:camLook.clone()};camTo=CAMS[camFor(name)];camT=0;
+  }
+  function frame(now){
+    if(anim){const t=anim.dur?Math.min(1,(now-anim.start)/anim.dur):1;apply(anim.from,anim.to,ease(t));
+      camT=t;camera.position.lerpVectors(camFrom.p,camTo.p,ease(camT));camLook.lerpVectors(camFrom.l,camTo.l,ease(camT));
+      if(t>=1)anim=null}
+    // gentle breathing so the figure never looks frozen (skipped with reduced motion)
+    if(!reduce())chest.scale.setScalar(1+Math.sin(now/900)*.006);
+    camera.lookAt(camLook);renderer.render(scene,camera);requestAnimationFrame(frame);
+  }
+  function resize(){const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;
+    camera.fov=w/h<.8?36:28;camera.updateProjectionMatrix()}   // taller phones: wider lens keeps the whole figure large and visible
+  camera.position.copy(CAMS.side.p);
+  pose('WAITING',true);apply(anim.from,anim.to,1);anim=null;
+  resize();requestAnimationFrame(frame);new ResizeObserver(resize).observe(host);
+  host.dataset.sceneReady='1';
+  three={resize,pose};
+}
+
+loadSettings();init3D();render();checkServer();
+// Testing hook: simulate recognized speech without a microphone, e.g. __imam.say('الله أكبر').
+window.__imam={say:t=>handleResult({type:'Results',is_final:true,start:performance.now()/1000,channel:{alternatives:[{transcript:t,confidence:1}]}}),
+  showPrayer:showPrayerScreen,state:()=>({...prayer}),pose:n=>three&&three.pose(n,true),reset};
+})();
+</script>
+
+<script>
+// Installable PWA support. Service worker caches the app shell; live speech still needs internet.
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(err => console.warn('IMAM offline cache unavailable:', err)));
+}
+</script>
+</body></html>
