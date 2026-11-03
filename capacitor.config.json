@@ -1,0 +1,12 @@
+{
+  "appId": "com.imam.prayercompanion",
+  "appName": "إمام",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#061713"
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}
